@@ -1,0 +1,176 @@
+﻿@page "/admin/manage-blogs/new" 
+
+
+@inject IJSRuntime Js
+@inject CategoryService CategoryService
+@inject NavigationManager NavigationManager
+
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center">
+        <button class="btn btn-primary btn-sm" @onclick="GoHome"> Back To Home</button>
+    </div>
+ </div>
+ <hr />
+<div class="container">
+    <div class="d-flex justify-content-between align-items-center">
+        <button class="btn btn-primary btn-sm" @onclick="OpenCategoryFormAsync">+ Add new Category</button>
+    </div>
+<div class="column-container"
+    <table class="table">
+        <thead>
+            <tr>
+                <th style="background-color:aqua">
+                    Category No
+                </th>
+                <th style="background-color:aqua">
+                    CATEGORY NAME
+                </th>
+                <th style="background-color:aqua">
+                    SOURCE TO LEARN 
+                </th>
+                <th style="background-color:aqua">
+                    EDIT
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @if (_loading)
+            {
+                <tr>
+                    <td colspan="4">
+                        Loading categories...
+                    </td>
+                </tr>
+            }
+            else if(!_loading && (_categories is null || !_categories.Any()))
+            {
+                <tr>
+                    <td colspan="4">
+                        No categories found.
+                    </td>
+                </tr>
+            }
+            else
+            {
+                int sno = 1;
+                foreach (var category in _categories)
+                {
+                    <tr>
+                        <td>@category.Id</td>
+                        <td>@category.Name</td>
+                        <td>@category.Slug</td>
+                        <td>
+                            <button type="button" class="btn btn-default btn-sm" @onclick="()=> EditCategoryAsync(category)">Edit</button>
+                        </td>
+                    </tr>
+                    sno++;
+            }
+            }
+        </tbody>
+    </table>
+    </div>
+</div>
+<style type="text/css">
+    dialog{
+        padding: 0;
+        border: 2px solid var(--color-purple);
+    }
+    body{
+        font-family: 'Arial', sans-serif;
+        background-color: khaki;
+        margin: 0;
+        padding: 0;
+    }
+
+    .column-container {
+        display: flex;
+        justify-content: space-around;
+        align-items: center;
+        height: 100vh; /* Adjust as needed */
+    }
+
+    .column {
+        width: 20%;
+        padding: 20px;
+        text-align: center;
+        background-color: #3498db;
+        color: lightpink;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.2);
+        transition: background-color 0.3s ease-in-out;
+    }
+
+        .column:hover {
+            background-color: #2980b9;
+        }
+</style>
+  }    
+
+
+@code {
+    private const string _categoryFormDialogId = "category-form";
+    private bool _loading = false;
+    private IEnumerable<Category>? _categories = null;
+
+    private Category _categoryModel = new();
+
+
+
+    protected override async Task OnInitializedAsync()
+    {
+        await LoadCategoriesAsync();
+    }
+
+    private async Task LoadCategoriesAsync()
+    {
+        _loading = true;
+        try
+        {
+            _categories = await CategoryService.GetCategoriesAsync();
+        }
+        finally
+        {
+            _loading = false;
+        }
+    }
+
+    private async Task OpenCategoryFormAsync() =>
+        await Js.InvokeVoidAsync("window.openModal", _categoryFormDialogId);
+
+    private async Task CloseCategoryFormAsync()
+    {
+        _categoryModel = new();
+        await Js.InvokeVoidAsync("window.closeModal", _categoryFormDialogId);
+    }
+
+    private async Task EditCategoryAsync(Category category)
+    {
+        _categoryModel = category.Clone();
+        await OpenCategoryFormAsync();
+    }
+    protected async void GoHome()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    private async Task OnSaveCategory(MethodResult saveCategoryResult)
+    {
+        if (saveCategoryResult.Status)
+        {
+            // Category saved successfully
+            await AlertAsync("Category saved successfully");
+            await LoadCategoriesAsync();
+            await CloseCategoryFormAsync();
+        }
+        else
+        {
+            // there was some error in saving category
+            await AlertAsync(saveCategoryResult.ErrorMessage!);
+        }
+    }
+    private async Task AlertAsync(string message)
+    {
+        await Js.InvokeVoidAsync("window.alert", message);
+    }
+
+}

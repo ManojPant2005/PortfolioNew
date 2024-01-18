@@ -1,0 +1,59 @@
+﻿@page "/secondIndex"
+@page "/c/{categorySlug}/posts"
+
+@inject PostService BlogPostService
+@inject CategoryService CategoryService
+
+<PageTitle>@heading | New Programs</PageTitle>
+
+<div class="container">
+    <div class="row">
+        <div class="col-sm-9">
+            <h1 class="fs-3">@heading</h1>
+            <hr />
+            @if (!posts.Any())
+            {
+                <div class="d-flex justify-content-center flex-column align-items-center" style="min-height: 250px">
+                    <h3>No blog posts found</h3>
+                            <NavLink href="/admin/manage-blogs/new" class="btn btn-primary">Click here to create a new blog post</NavLink>
+
+                            <p>Please check back later</p>
+
+                </div>
+            }
+            else
+            {
+                <PostLists Posts="posts" />
+            }
+        </div>
+    </div>
+</div>
+
+@code{
+    [Parameter]
+    public string? CategorySlug { get; set; }
+
+    private string heading = "Latest Posts";
+
+    private IEnumerable<NewPost> posts = Enumerable.Empty<NewPost>();
+
+    protected override async Task OnParametersSetAsync() => await SetDataAsync();
+
+    private async Task SetDataAsync()
+    {
+        var postsTask = BlogPostService.GetPostsAsync(publishedOnly: true, CategorySlug);
+
+        posts = await postsTask;
+    }
+    private void SetHeading(string? categoryName = null)
+    {
+        if (!string.IsNullOrWhiteSpace(CategorySlug) && !string.IsNullOrWhiteSpace(categoryName))
+        {
+            heading = $"Latest {categoryName} Posts";
+        }
+        else
+        {
+            heading = "Latest Posts";
+        }
+    }
+}

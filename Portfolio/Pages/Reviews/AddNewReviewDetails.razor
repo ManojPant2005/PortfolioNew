@@ -1,0 +1,61 @@
+﻿  @page "/addnewreview"
+
+
+ @inject ReviewService Service
+ @inject NavigationManager NavigationManager
+<h3 style="background-color:aqua"> + ADD YOUR REVIEW</h3>
+<hr />
+<form>
+    <div class="container">
+        <div class="col-md-8 15" >
+            <div class="for-group" style="border:3px solid pink">
+                <label for="Your Name" class="control-label" placeholder="Enter your Name"><b>ENTER NAME</b></label>
+                <input form="name" class="form-control" @bind="@obj.UserName" />
+            </div>
+         </div>
+        <div class="container">
+            <div class="col-md-8 15">
+                <div class="for-group" style="border:3px solid pink">
+                    <label for="Your Review" class="control-label" placeholder="Enter your Review"><b>ENTER REVIEW</b></label>
+                    <input form="Review" class="form-control" @bind="@obj.SubmitReview" />
+                </div>
+            </div>
+     </div>
+</div>
+<br />
+
+        <div class="col-md-2">
+        <div class="button-row"
+                <input type="button" class="btn btn-primary" @onclick="@CreateNew" value="Save Review" />
+                <input type="button" class="btn btn-primary" @onclick="@AllReviews" value="All Reviews" />
+                <input type="button" class="btn btn-danger" @onclick="AllReviews" value="Cancel" />
+            </div>
+    </div>
+</form>
+      <style>
+    .container{
+        text-align:center;
+    }
+
+    .button-row {
+        display: flex;
+        justify-content: space-between;
+    }
+</style>
+@code {
+    Review obj = new Review();
+
+    protected async void CreateNew()
+    {
+        await Service.AddNewReviewDetails(obj);
+        NavigationManager.NavigateTo("reviewsList");
+    }
+    protected async void Cancel()
+    {
+        NavigationManager.NavigateTo("reviewsList");
+    }
+    protected async void AllReviews()
+    {
+        NavigationManager.NavigateTo("reviewsList");
+    }
+}

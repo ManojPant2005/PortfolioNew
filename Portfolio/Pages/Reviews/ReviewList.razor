@@ -1,0 +1,88 @@
+﻿@page "/reviewsList"
+
+@inject ReviewService ReviewService
+@inject NavigationManager NavigationManager
+
+
+<div class="row">
+    <div class="col-md-4">
+        <div class="form-group">
+            <input type="button" class="btn btn-success" style="align-content:space-around" @onclick="@GoHome" value="HOME" />
+        </div>
+    </div>
+</div>
+<NavLink class="nav-link" href="addnewreview">
+    <span style="font-family:'Berlin Sans FB'"> <h3 style="font-family:'Segoe UI', Tahoma, Geneva, Verdana, sans-serif; text-align:center"><u>ADD NEW REVIEW <h5>click here</h5></u></h3></span>
+</NavLink>
+
+<br />
+<br />
+<h3 style="font-family:Dubai">REVIEWS..</h3>
+
+@if (EmpObj is null)
+{
+    <p><em>Loading..............!!</em></p>
+}
+else
+{
+    <table class="table">
+        <thead>
+            <tr>
+                <th style="background-color:aqua">
+                    Review No
+                </th>
+                <th style="background-color:aqua">
+                    USER NAME
+                </th>
+                <th style="background-color:aqua">
+                    REVIEW
+                </th>
+                <th style="background-color:aqua">
+                    RATING
+                </th>
+            </tr>
+        </thead>
+        <tbody>
+            @foreach (var reviewDetail in EmpObj)
+            {
+                <tr>
+                    <td>
+                        @reviewDetail.Id
+                    </td>
+                    <td>
+                        @reviewDetail.UserName
+                    </td>
+                    <td>
+                        @reviewDetail.SubmitReview
+                    </td>
+                    <td>
+                        <a class="nav-link btn btn-group-sm" href="EditReviewDetails/@reviewDetail.Id">
+                            <span class="oi oi-pencil" aria-hidden="true"> Edit </span>
+                        </a>
+                    </td>
+
+                </tr>
+            }
+        </tbody>
+    </table>
+}
+
+<style>
+    body{
+        background-color:paleturquoise;
+    }
+</style>
+
+@code {
+    List<Review> EmpObj;
+
+    protected async void GoHome()
+    {
+        NavigationManager.NavigateTo("/");
+    }
+
+    protected override async Task OnInitializedAsync()
+    {
+        EmpObj = await Task.Run(() => ReviewService.GetAllReviews());
+    }
+}
